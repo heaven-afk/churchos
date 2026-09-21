@@ -111,10 +111,19 @@ export const useServiceStore = create<ServiceState>((set) => ({
 
 // ─── Derived selectors ────────────────────────────────────────────────────────
 
-/** Active (non-removed) items in order */
+const EMPTY_ITEMS: ServiceItem[] = [];
+let lastItemsRef: ServiceItem[] | null = null;
+let cachedActiveItems: ServiceItem[] = EMPTY_ITEMS;
+
+/** Active (non-removed) items in order — cached for React 19 snapshot stability */
 export function selectActiveItems(state: ServiceState): ServiceItem[] {
-  if (!state.currentService) return [];
-  return [...state.currentService.items]
+  const items = state.currentService?.items;
+  if (!items || items.length === 0) return EMPTY_ITEMS;
+  if (items === lastItemsRef) return cachedActiveItems;
+
+  lastItemsRef = items;
+  cachedActiveItems = items
     .filter((i) => !i.isRemoved)
     .sort((a, b) => a.order - b.order);
+  return cachedActiveItems;
 }
