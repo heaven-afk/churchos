@@ -58,6 +58,8 @@ export interface OutputState {
   status: OutputStatus;
   /** The slide currently shown to the audience */
   liveSlide: PresentationSlide | null;
+  /** The slide currently being previewed/staged by the operator */
+  previewSlide: PresentationSlide | null;
   /** Pre-rendered next slide for preview */
   nextSlide: PresentationSlide | null;
   /** Active layout override (overrides the slide's own layout) */

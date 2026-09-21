@@ -2,6 +2,7 @@
 
 import { usePresentationStore } from "@/store/presentation.store";
 import { useServiceStore } from "@/store/service.store";
+import { displayAdapter } from "@/providers/display/browser.adapter";
 
 /**
  * OutputMonitor — the bottom strip showing live output status.
@@ -84,22 +85,23 @@ export function OutputMonitor() {
         </span>
       )}
 
-      {/* Output window link */}
-      <a
-        href="/presentation"
-        target="_blank"
-        rel="noopener noreferrer"
+      {/* Output window trigger */}
+      <button
         id="btn-open-output"
+        onClick={() => {
+          displayAdapter.activateOutput("congregation");
+        }}
         className="ml-auto text-xs px-2 py-1 rounded transition-colors"
         style={{
           color: "var(--color-fg-subtle)",
           border: "1px solid var(--color-border)",
+          background: "transparent",
         }}
         title="Open presentation output window"
         aria-label="Open presentation output in a new window"
       >
         Open Output ↗
-      </a>
+      </button>
     </footer>
   );
 }

@@ -33,7 +33,7 @@ interface ServiceState {
   setError: (error: string | null) => void;
 }
 
-export const useServiceStore = create<ServiceState>((set, get) => ({
+export const useServiceStore = create<ServiceState>((set) => ({
   currentService: null,
   selectedItemId: null,
   selectedSlideIndex: 0,

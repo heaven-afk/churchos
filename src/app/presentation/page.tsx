@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 export default function PresentationPage() {
   return (
     <main className="h-screen w-screen overflow-hidden bg-black">
-      <PresentationCanvas />
+      <PresentationCanvas isReceiver={true} />
     </main>
   );
 }

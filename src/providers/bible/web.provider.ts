@@ -78,9 +78,10 @@ export class WebBibleProvider implements BibleProvider {
   async getChapter(
     book: string,
     chapter: number,
-    _translation?: string
+    translation?: string
   ): Promise<BibleChapter> {
-    const cacheKey = `${book}-${chapter}`;
+    const activeTranslation = translation ?? "WEB";
+    const cacheKey = `${book}-${chapter}-${activeTranslation}`;
     if (this.chapterCache.has(cacheKey)) {
       return this.chapterCache.get(cacheKey)!;
     }
@@ -101,9 +102,10 @@ export class WebBibleProvider implements BibleProvider {
     chapter: number,
     verse: number,
     verseEnd?: number,
-    _translation?: string
+    translation?: string
   ): Promise<BiblePassage> {
-    const chapterData = await this.getChapter(book, chapter);
+    const activeTranslation = translation ?? "WEB";
+    const chapterData = await this.getChapter(book, chapter, activeTranslation);
     const verses = chapterData.verses.filter(
       (v) =>
         v.verse >= verse && (verseEnd === undefined || v.verse <= verseEnd)
@@ -116,7 +118,7 @@ export class WebBibleProvider implements BibleProvider {
 
     return {
       reference,
-      translation: this.translation,
+      translation: activeTranslation,
       verses,
     };
   }

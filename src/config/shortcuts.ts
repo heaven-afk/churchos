@@ -70,6 +70,13 @@ const SHORTCUTS: ShortcutBinding[] = [
     context: 'operator',
     preventDefault: true,
   },
+  {
+    key: 'enter',
+    action: { type: 'SEND_LIVE' },
+    description: 'Send staged slide live',
+    context: 'operator',
+    preventDefault: true,
+  },
 
   // ── Emergency Controls ────────────────────────────────────────────────────
   {

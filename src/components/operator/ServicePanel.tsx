@@ -57,7 +57,7 @@ export function ServicePanel() {
         {items.length === 0 ? (
           <ServicePanelEmptyState hasService={!!currentService} />
         ) : (
-          <div className="py-1">
+          <div role="listbox" aria-label="Service items" className="py-1">
             {items.map((item, index) => (
               <ServiceItemRow
                 key={item.id}
@@ -128,7 +128,7 @@ function ServiceItemRow({
 
   return (
     <div
-      role="listitem"
+      role="option"
       className="flex items-center gap-3 px-3 py-2.5 cursor-pointer transition-colors group"
       style={{
         background: isSelected ? "var(--color-primary-subtle)" : "transparent",

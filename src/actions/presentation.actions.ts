@@ -1,15 +1,19 @@
 /**
- * Centralized Presentation Action System — spec §8 & §28
+ * Centralized Presentation Action System — spec §8 & §28, Phase 1 §4.4
  *
  * All presentation state changes flow through this module.
  * UI components, keyboard shortcuts, remote controls, and future APIs
  * all call these actions — never duplicate this logic elsewhere.
  *
- * Pattern: dispatch(action) → updates presentation store → triggers render
+ * Pattern: dispatch(action) → updates presentation store → triggers render & output sync
  */
 
 import { usePresentationStore } from '@/store/presentation.store';
-import type { LayoutId, Background, PresentationSlide } from '@/types/presentation.types';
+import type {
+  LayoutId,
+  Background,
+  PresentationSlide,
+} from '@/types/presentation.types';
 
 // ─── Action Discriminated Union ───────────────────────────────────────────────
 
@@ -18,28 +22,36 @@ export type PresentationActionType =
   | 'PREVIOUS_SLIDE'
   | 'GO_TO_SLIDE'
   | 'SEND_LIVE'
+  | 'SET_PREVIEW'
   | 'BLACK_SCREEN'
   | 'CLEAR_OUTPUT'
   | 'FREEZE_OUTPUT'
   | 'UNFREEZE_OUTPUT'
+  | 'SET_LAYOUT'
   | 'CHANGE_LAYOUT'
+  | 'SET_BACKGROUND'
   | 'CHANGE_BACKGROUND'
   | 'SHOW_SCRIPTURE'
-  | 'SHOW_LOWER_THIRD';
+  | 'SHOW_LOWER_THIRD'
+  | 'SET_SLIDES';
 
 export type PresentationAction =
   | { type: 'NEXT_SLIDE' }
   | { type: 'PREVIOUS_SLIDE' }
   | { type: 'GO_TO_SLIDE'; slideId: string }
-  | { type: 'SEND_LIVE'; slide: PresentationSlide }
+  | { type: 'SEND_LIVE'; slide?: PresentationSlide }
+  | { type: 'SET_PREVIEW'; slide: PresentationSlide | null }
   | { type: 'BLACK_SCREEN' }
   | { type: 'CLEAR_OUTPUT' }
   | { type: 'FREEZE_OUTPUT' }
   | { type: 'UNFREEZE_OUTPUT' }
-  | { type: 'CHANGE_LAYOUT'; layoutId: LayoutId }
-  | { type: 'CHANGE_BACKGROUND'; background: Background }
+  | { type: 'SET_LAYOUT'; layoutId: LayoutId | null }
+  | { type: 'CHANGE_LAYOUT'; layoutId: LayoutId | null }
+  | { type: 'SET_BACKGROUND'; background: Background | null }
+  | { type: 'CHANGE_BACKGROUND'; background: Background | null }
   | { type: 'SHOW_SCRIPTURE'; slideId: string }
-  | { type: 'SHOW_LOWER_THIRD'; text: string; subtext?: string };
+  | { type: 'SHOW_LOWER_THIRD'; text: string; subtext?: string }
+  | { type: 'SET_SLIDES'; slides: PresentationSlide[] };
 
 // ─── Action Dispatcher ────────────────────────────────────────────────────────
 
@@ -49,7 +61,8 @@ export type PresentationAction =
  * Usage:
  *   dispatch({ type: 'NEXT_SLIDE' })
  *   dispatch({ type: 'BLACK_SCREEN' })
- *   dispatch({ type: 'CHANGE_LAYOUT', layoutId: 'lower-third' })
+ *   dispatch({ type: 'SEND_LIVE' })
+ *   dispatch({ type: 'SET_LAYOUT', layoutId: 'lower-third' })
  */
 export function dispatch(action: PresentationAction): void {
   const store = usePresentationStore.getState();
@@ -71,6 +84,10 @@ export function dispatch(action: PresentationAction): void {
       store.sendLive(action.slide);
       break;
 
+    case 'SET_PREVIEW':
+      store.setPreview(action.slide);
+      break;
+
     case 'BLACK_SCREEN':
       store.setOutputStatus('black');
       break;
@@ -87,10 +104,12 @@ export function dispatch(action: PresentationAction): void {
       store.setOutputStatus('live');
       break;
 
+    case 'SET_LAYOUT':
     case 'CHANGE_LAYOUT':
       store.setLayoutOverride(action.layoutId);
       break;
 
+    case 'SET_BACKGROUND':
     case 'CHANGE_BACKGROUND':
       store.setBackgroundOverride(action.background);
       break;
@@ -101,6 +120,10 @@ export function dispatch(action: PresentationAction): void {
 
     case 'SHOW_LOWER_THIRD':
       store.showLowerThird(action.text, action.subtext);
+      break;
+
+    case 'SET_SLIDES':
+      store.setSlides(action.slides);
       break;
 
     default: {
