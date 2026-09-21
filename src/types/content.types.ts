@@ -14,6 +14,7 @@ export type LyricSectionType =
   | 'intro'
   | 'outro'
   | 'pre-chorus'
+  | 'interlude'
   | 'tag'
   | 'custom';
 
@@ -24,8 +25,12 @@ export interface LyricSection {
   label: string;
   /** Lyric body — newlines separate lines, double-newlines separate slides */
   body: string;
+  /** Optional alias for body per Phase 1 §6.1 */
+  content?: string;
+  /** Explicit order of section in the song */
+  order?: number;
   /** Resolved slides derived from body at edit time */
-  slides: string[];
+  slides?: string[];
 }
 
 export interface Song {

@@ -6,11 +6,12 @@ import { dispatch } from "@/actions/presentation.actions";
 import type { LayoutId } from "@/types/presentation.types";
 
 import { ScripturePanel } from "./ScripturePanel";
+import { SongLibraryPanel } from "./SongLibraryPanel";
 
 /**
- * ControlPanel — right panel for Scripture, layout, background, and media controls.
+ * ControlPanel — right panel for Songs, Scripture, layout, background, and media controls.
  *
- * Implements Phase 1 §5.3 Scripture Search & Selection.
+ * Implements Phase 1 §5.3 Scripture Search and §6.2 Song Library.
  */
 export function ControlPanel() {
   const isOpen = useUIStore((s) => s.isControlPanelOpen);
@@ -38,7 +39,7 @@ export function ControlPanel() {
         role="tablist"
         aria-label="Control panel tabs"
       >
-        {(["scripture", "layout", "background", "media"] as const).map((tab) => (
+        {(["songs", "scripture", "layout", "background", "media"] as const).map((tab) => (
           <button
             key={tab}
             role="tab"
@@ -65,6 +66,17 @@ export function ControlPanel() {
 
       {/* Tab panels */}
       <div className="flex-1 overflow-y-auto p-3">
+        {activeTab === "songs" && (
+          <div
+            id="tabpanel-songs"
+            role="tabpanel"
+            aria-labelledby="tab-songs"
+            className="h-full"
+          >
+            <SongLibraryPanel />
+          </div>
+        )}
+
         {activeTab === "scripture" && (
           <div
             id="tabpanel-scripture"

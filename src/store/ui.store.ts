@@ -25,21 +25,21 @@ interface UIState {
   /** Which modal (if any) is currently open */
   activeModal: ActiveModal;
   /** Currently active tab within the control panel */
-  controlPanelTab: 'scripture' | 'layout' | 'background' | 'media';
+  controlPanelTab: "songs" | "scripture" | "layout" | "background" | "media";
 
   // Actions
   toggleServicePanel: () => void;
   toggleControlPanel: () => void;
   openModal: (modal: ActiveModal) => void;
   closeModal: () => void;
-  setControlPanelTab: (tab: UIState['controlPanelTab']) => void;
+  setControlPanelTab: (tab: UIState["controlPanelTab"]) => void;
 }
 
 export const useUIStore = create<UIState>((set) => ({
   isServicePanelOpen: true,
   isControlPanelOpen: true,
   activeModal: null,
-  controlPanelTab: 'scripture',
+  controlPanelTab: "songs",
 
   toggleServicePanel: () =>
     set((s) => ({ isServicePanelOpen: !s.isServicePanelOpen })),

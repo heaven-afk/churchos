@@ -115,8 +115,9 @@ function ServicePanelEmptyState({ hasService }: { hasService: boolean }) {
 
 import { dispatch } from "@/actions/presentation.actions";
 import type { ServiceItem } from "@/types/service.types";
-import type { Scripture } from "@/types/content.types";
+import type { Scripture, Song } from "@/types/content.types";
 import type { PresentationSlide } from "@/types/presentation.types";
+import { songToPresentationSlides } from "@/lib/lyrics/lyric.service";
 
 const ITEM_TYPE_ICONS: Record<string, string> = {
   song: "🎵",
@@ -158,6 +159,13 @@ function ServiceItemRow({
             },
           })
         );
+        dispatch({ type: "SET_SLIDES", slides: presentationSlides });
+        dispatch({ type: "SET_PREVIEW", slide: presentationSlides[0] });
+      }
+    } else if (item.type === "song" && item.content) {
+      const song = item.content as Song;
+      const presentationSlides = songToPresentationSlides(song);
+      if (presentationSlides.length > 0) {
         dispatch({ type: "SET_SLIDES", slides: presentationSlides });
         dispatch({ type: "SET_PREVIEW", slide: presentationSlides[0] });
       }
