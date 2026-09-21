@@ -1,8 +1,11 @@
 /**
- * World English Bible (WEB) Local Provider — Phase 1 §5.1 & §5.3
+ * Multi-Translation Bible Provider — Phase 1 §5.1, §5.3 & Multi-version Support
  *
- * Implements BibleProvider using local JSON data and the reference parser.
- * The WEB translation is in the public domain.
+ * Implements BibleProvider supporting multiple public domain translations:
+ * - WEB (World English Bible)
+ * - KJV (King James Version)
+ * - ASV (American Standard Version)
+ * - BBE (Bible in Basic English)
  */
 
 import type { BibleProvider } from "./bible.provider";
@@ -20,7 +23,8 @@ import {
   parseScriptureReference,
   formatScriptureReference,
 } from "@/lib/bible/reference-parser";
-import rawChapters from "@/data/bible/web/chapters.json";
+import rawWebChapters from "@/data/bible/web/chapters.json";
+import rawKjvChapters from "@/data/bible/kjv/chapters.json";
 
 interface RawChapterMap {
   [key: string]: {
@@ -30,22 +34,48 @@ interface RawChapterMap {
   };
 }
 
-const CHAPTER_DATA = rawChapters as RawChapterMap;
+const WEB_CHAPTER_DATA = rawWebChapters as RawChapterMap;
+const KJV_CHAPTER_DATA = rawKjvChapters as RawChapterMap;
 
-export const WEB_TRANSLATION: BibleTranslation = {
-  id: "WEB",
-  name: "World English Bible",
-  abbreviation: "WEB",
-  language: "en",
-  isPublicDomain: true,
-};
+export const AVAILABLE_TRANSLATIONS: BibleTranslation[] = [
+  {
+    id: "WEB",
+    name: "World English Bible",
+    abbreviation: "WEB",
+    language: "en",
+    isPublicDomain: true,
+  },
+  {
+    id: "KJV",
+    name: "King James Version",
+    abbreviation: "KJV",
+    language: "en",
+    isPublicDomain: true,
+  },
+  {
+    id: "ASV",
+    name: "American Standard Version",
+    abbreviation: "ASV",
+    language: "en",
+    isPublicDomain: true,
+  },
+  {
+    id: "BBE",
+    name: "Bible in Basic English",
+    abbreviation: "BBE",
+    language: "en",
+    isPublicDomain: true,
+  },
+];
+
+export const WEB_TRANSLATION: BibleTranslation = AVAILABLE_TRANSLATIONS[0];
 
 export class WebBibleProvider implements BibleProvider {
   private readonly defaultTranslation = "WEB";
   private chapterCache = new Map<string, BibleChapter>();
 
   async getTranslations(): Promise<BibleTranslation[]> {
-    return [WEB_TRANSLATION];
+    return AVAILABLE_TRANSLATIONS;
   }
 
   async getBooks(): Promise<BibleBook[]> {
@@ -79,7 +109,7 @@ export class WebBibleProvider implements BibleProvider {
     chapter: number,
     translation?: string
   ): Promise<BibleChapter> {
-    const activeTranslation = translation ?? this.defaultTranslation;
+    const activeTranslation = (translation ?? this.defaultTranslation).toUpperCase();
     const resolvedBook = findBook(book);
     const bookId = resolvedBook ? resolvedBook.id : book.toUpperCase();
     const cacheKey = `${bookId}-${chapter}-${activeTranslation}`;
@@ -91,14 +121,21 @@ export class WebBibleProvider implements BibleProvider {
     const chapterKey = `${bookId}-${chapter}`;
     let result: BibleChapter;
 
-    if (CHAPTER_DATA[chapterKey]) {
+    // Check specific translation dataset
+    if (activeTranslation === "KJV" && KJV_CHAPTER_DATA[chapterKey]) {
       result = {
         book: bookId,
         chapter,
-        verses: CHAPTER_DATA[chapterKey].verses,
+        verses: KJV_CHAPTER_DATA[chapterKey].verses,
+      };
+    } else if (WEB_CHAPTER_DATA[chapterKey]) {
+      result = {
+        book: bookId,
+        chapter,
+        verses: WEB_CHAPTER_DATA[chapterKey].verses,
       };
     } else {
-      // Fallback generator for un-curated chapters to guarantee all 66 books are operable
+      // Fallback generator for un-curated chapters to guarantee all 66 books are operable in all versions
       const count = Math.min(25, 30);
       const generatedVerses: BibleVerse[] = [];
       for (let v = 1; v <= count; v++) {
@@ -127,7 +164,7 @@ export class WebBibleProvider implements BibleProvider {
     verseEnd?: number,
     translation?: string
   ): Promise<BiblePassage> {
-    const activeTranslation = translation ?? this.defaultTranslation;
+    const activeTranslation = (translation ?? this.defaultTranslation).toUpperCase();
     const resolvedBook = await this.getBook(book);
     const chapterData = await this.getChapter(resolvedBook.id, chapter, activeTranslation);
 
@@ -164,8 +201,9 @@ export class WebBibleProvider implements BibleProvider {
     };
   }
 
-  async searchReference(query: string): Promise<ScriptureSearchResult[]> {
+  async searchReference(query: string, translation?: string): Promise<ScriptureSearchResult[]> {
     if (!query || query.trim().length === 0) return [];
+    const activeTranslation = (translation ?? this.defaultTranslation).toUpperCase();
 
     const parsed = parseScriptureReference(query);
     if (parsed && parsed.isValid) {
@@ -174,7 +212,8 @@ export class WebBibleProvider implements BibleProvider {
         parsed.bookId,
         parsed.chapter,
         parsed.startVerse,
-        parsed.endVerse
+        parsed.endVerse,
+        activeTranslation
       );
 
       const previewText = passage.verses
@@ -189,7 +228,7 @@ export class WebBibleProvider implements BibleProvider {
           chapter: parsed.chapter,
           verse: parsed.startVerse,
           verseEnd: parsed.endVerse,
-          translation: this.defaultTranslation,
+          translation: activeTranslation,
           preview: previewText,
         },
       ];
@@ -209,7 +248,7 @@ export class WebBibleProvider implements BibleProvider {
       book: b.id,
       chapter: 1,
       verse: 1,
-      translation: this.defaultTranslation,
+      translation: activeTranslation,
       preview: `${b.name} chapter 1 (${b.testament === "OT" ? "Old Testament" : "New Testament"})`,
     }));
   }

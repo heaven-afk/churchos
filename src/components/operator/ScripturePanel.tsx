@@ -9,7 +9,7 @@ import {
 } from "@/lib/bible/scripture.service";
 import { dispatch } from "@/actions/presentation.actions";
 import { useServiceStore } from "@/store/service.store";
-import type { BiblePassage } from "@/types/bible.types";
+import type { BiblePassage, BibleTranslation } from "@/types/bible.types";
 
 const QUICK_PASSAGES = [
   "John 3:16-18",
@@ -23,6 +23,8 @@ const QUICK_PASSAGES = [
 
 export function ScripturePanel() {
   const [query, setQuery] = useState("John 3:16-18");
+  const [translation, setTranslation] = useState("WEB");
+  const [translations, setTranslations] = useState<BibleTranslation[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [passage, setPassage] = useState<BiblePassage | null>(null);
 
@@ -30,7 +32,12 @@ export function ScripturePanel() {
   const setCurrentService = useServiceStore((s) => s.setCurrentService);
   const addItem = useServiceStore((s) => s.addItem);
 
-  // Resolve passage whenever query changes
+  // Load available translations
+  useEffect(() => {
+    bibleProvider.getTranslations().then(setTranslations);
+  }, []);
+
+  // Resolve passage whenever query or translation changes
   useEffect(() => {
     let isCancelled = false;
 
@@ -48,7 +55,8 @@ export function ScripturePanel() {
             parsed.bookId,
             parsed.chapter,
             parsed.startVerse,
-            parsed.endVerse
+            parsed.endVerse,
+            translation
           );
           if (!isCancelled) {
             setPassage(result);
@@ -64,12 +72,12 @@ export function ScripturePanel() {
       }
     }
 
-    const timer = setTimeout(loadPassage, 200);
+    const timer = setTimeout(loadPassage, 150);
     return () => {
       isCancelled = true;
       clearTimeout(timer);
     };
-  }, [query]);
+  }, [query, translation]);
 
   // Stage preview in operator window
   const handleStagePreview = () => {
@@ -116,14 +124,33 @@ export function ScripturePanel() {
 
   return (
     <div className="flex flex-col gap-4 text-white/90">
-      {/* Quick Search Input */}
+      {/* Search Input & Version Dropdown */}
       <div className="flex flex-col gap-1.5">
-        <label
-          htmlFor="scripture-search-input"
-          className="text-xs font-semibold uppercase tracking-wider text-zinc-400"
-        >
-          Search Scripture
-        </label>
+        <div className="flex items-center justify-between">
+          <label
+            htmlFor="scripture-search-input"
+            className="text-xs font-semibold uppercase tracking-wider text-zinc-400"
+          >
+            Search Scripture
+          </label>
+          <div className="flex items-center gap-1.5">
+            <span className="text-[10px] uppercase text-zinc-500 font-mono">Version:</span>
+            <select
+              id="select-bible-translation"
+              value={translation}
+              onChange={(e) => setTranslation(e.target.value)}
+              className="text-xs px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-blue-400 font-semibold outline-none cursor-pointer"
+              aria-label="Bible translation version"
+            >
+              {translations.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.id} ({t.name})
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
         <div className="relative">
           <input
             id="scripture-search-input"
@@ -166,7 +193,7 @@ export function ScripturePanel() {
             <span className="font-semibold text-sm text-blue-400">
               {passage.reference}
             </span>
-            <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400">
+            <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-blue-950/60 border border-blue-800 text-blue-300 font-bold">
               {passage.translation} · {passage.verses.length}{" "}
               {passage.verses.length === 1 ? "verse" : "verses"}
             </span>
