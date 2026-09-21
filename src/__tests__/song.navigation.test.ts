@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { useSongStore } from "@/store/song.store";
+import type { Song } from "@/types/content.types";
 import { songToPresentationSlides, createSongServiceItem } from "@/lib/lyrics/lyric.service";
 import { dispatch } from "@/actions/presentation.actions";
 import { usePresentationStore } from "@/store/presentation.store";
