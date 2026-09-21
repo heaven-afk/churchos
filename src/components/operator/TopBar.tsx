@@ -5,12 +5,14 @@ import { EmergencyControls } from "./EmergencyControls";
 import { displayAdapter } from "@/providers/display/browser.adapter";
 import { useOperatorBroadcaster } from "@/hooks/usePresentationSync";
 
+import { useServiceStore } from "@/store/service.store";
+
 /**
  * TopBar — the persistent top navigation bar.
  *
  * Contains:
  * - Product wordmark
- * - Service title (when open)
+ * - Dynamic Service title & sync state
  * - Display output trigger button
  * - Emergency controls (always visible — spec §27)
  */
@@ -18,9 +20,20 @@ export function TopBar() {
   // Listen for sync requests from external presentation windows
   useOperatorBroadcaster();
 
+  const currentService = useServiceStore((s) => s.currentService);
+  const syncStatus = useServiceStore((s) => s.syncStatus);
+
   const handleOpenOutput = async () => {
     await displayAdapter.activateOutput("congregation");
   };
+
+  const formattedDate = currentService
+    ? new Date(currentService.date).toLocaleDateString(undefined, {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+      })
+    : null;
 
   return (
     <header
@@ -43,16 +56,53 @@ export function TopBar() {
         </span>
       </div>
 
-      {/* Service title placeholder */}
-      <div className="flex-1 min-w-0">
+      {/* Service title & sync status */}
+      <div className="flex-1 min-w-0 flex items-center gap-2">
         <span
-          className="text-sm truncate"
-          style={{ color: "var(--color-fg-muted)" }}
+          className="text-sm font-medium truncate"
+          style={{
+            color: currentService
+              ? "var(--color-fg-default)"
+              : "var(--color-fg-muted)",
+          }}
           aria-live="polite"
           aria-label="Current service"
         >
-          No service open
+          {currentService ? currentService.title : "No service open"}
         </span>
+
+        {formattedDate && (
+          <span
+            className="text-xs px-2 py-0.5 rounded"
+            style={{
+              color: "var(--color-fg-subtle)",
+              background: "var(--color-surface-1)",
+            }}
+          >
+            {formattedDate}
+          </span>
+        )}
+
+        {currentService && (
+          <span
+            className="text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded select-none"
+            style={{
+              color:
+                syncStatus === "synced"
+                  ? "var(--color-success)"
+                  : syncStatus === "error"
+                  ? "var(--color-warning)"
+                  : "var(--color-fg-subtle)",
+              background: "var(--color-surface-1)",
+            }}
+          >
+            {syncStatus === "synced"
+              ? "Synced"
+              : syncStatus === "syncing"
+              ? "Saving"
+              : "Local"}
+          </span>
+        )}
       </div>
 
       {/* Open Presentation Output Trigger */}

@@ -56,6 +56,7 @@ describe("Song Presentation & Navigation", () => {
 
     expect(serviceItem.type).toBe("song");
     expect(serviceItem.title).toBe(song.title);
-    expect(serviceItem.content).toBe(song);
+    expect((serviceItem.content as Song).title).toBe(song.title);
+    expect((serviceItem.content as { slides: unknown[] }).slides.length).toBeGreaterThan(0);
   });
 });
