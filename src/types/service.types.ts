@@ -22,6 +22,8 @@ export interface ServiceItem {
   order: number;
   /** Reference to the underlying content entity */
   contentId: string;
+  /** In-memory loaded or embedded content payload */
+  content?: unknown;
   /** Optional operator-facing notes, not displayed on output */
   notes?: string;
   /** Soft-deleted flag — never hard-delete items during a live service */

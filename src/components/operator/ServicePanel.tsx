@@ -14,6 +14,17 @@ export function ServicePanel() {
   const items = useServiceStore(selectActiveItems);
   const isOpen = useUIStore((s) => s.isServicePanelOpen);
 
+  const isControlPanelOpen = useUIStore((s) => s.isControlPanelOpen);
+  const toggleControlPanel = useUIStore((s) => s.toggleControlPanel);
+  const setControlPanelTab = useUIStore((s) => s.setControlPanelTab);
+
+  const handleAddClick = () => {
+    setControlPanelTab("scripture");
+    if (!isControlPanelOpen) {
+      toggleControlPanel();
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -40,13 +51,14 @@ export function ServicePanel() {
         </h2>
         <button
           id="btn-add-item"
-          className="flex items-center gap-1 rounded px-2 py-1 text-xs font-medium transition-colors"
+          onClick={handleAddClick}
+          className="flex items-center gap-1 rounded px-2 py-1 text-xs font-medium transition-colors cursor-pointer"
           style={{
             color: "var(--color-primary)",
             background: "var(--color-primary-subtle)",
           }}
           aria-label="Add service item"
-          title="Add item"
+          title="Add scripture or content"
         >
           + Add
         </button>
@@ -101,9 +113,10 @@ function ServicePanelEmptyState({ hasService }: { hasService: boolean }) {
   );
 }
 
-// ─── Item Row ─────────────────────────────────────────────────────────────────
-
+import { dispatch } from "@/actions/presentation.actions";
 import type { ServiceItem } from "@/types/service.types";
+import type { Scripture } from "@/types/content.types";
+import type { PresentationSlide } from "@/types/presentation.types";
 
 const ITEM_TYPE_ICONS: Record<string, string> = {
   song: "🎵",
@@ -126,6 +139,31 @@ function ServiceItemRow({
   const selectItem = useServiceStore((s) => s.selectItem);
   const isSelected = item.id === selectedId;
 
+  const handleSelect = () => {
+    selectItem(item.id);
+    if (item.type === "scripture" && item.content) {
+      const scripture = item.content as Scripture;
+      if (Array.isArray(scripture.slides) && scripture.slides.length > 0) {
+        const presentationSlides: PresentationSlide[] = scripture.slides.map(
+          (s, idx) => ({
+            id: `scr-${item.id}-${idx}`,
+            text: s.text,
+            subtext: `${s.ref.book} ${s.ref.chapter}:${s.ref.verse} (${s.ref.translation})`,
+            layout: "full-screen",
+            background: {
+              id: "black",
+              type: "color",
+              name: "Black",
+              value: "#000000",
+            },
+          })
+        );
+        dispatch({ type: "SET_SLIDES", slides: presentationSlides });
+        dispatch({ type: "SET_PREVIEW", slide: presentationSlides[0] });
+      }
+    }
+  };
+
   return (
     <div
       role="option"
@@ -136,9 +174,9 @@ function ServiceItemRow({
           ? "2px solid var(--color-primary)"
           : "2px solid transparent",
       }}
-      onClick={() => selectItem(item.id)}
+      onClick={handleSelect}
       tabIndex={0}
-      onKeyDown={(e) => e.key === "Enter" && selectItem(item.id)}
+      onKeyDown={(e) => e.key === "Enter" && handleSelect()}
       aria-selected={isSelected}
       aria-label={`${item.title}, item ${index + 1}`}
     >

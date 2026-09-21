@@ -5,11 +5,12 @@ import { usePresentationStore } from "@/store/presentation.store";
 import { dispatch } from "@/actions/presentation.actions";
 import type { LayoutId } from "@/types/presentation.types";
 
+import { ScripturePanel } from "./ScripturePanel";
+
 /**
- * ControlPanel — right panel for layout, background, and media controls.
+ * ControlPanel — right panel for Scripture, layout, background, and media controls.
  *
- * Phase 0 renders the panel structure with layout selection.
- * Phase 1+ will add background picker, media library, etc.
+ * Implements Phase 1 §5.3 Scripture Search & Selection.
  */
 export function ControlPanel() {
   const isOpen = useUIStore((s) => s.isControlPanelOpen);
@@ -37,7 +38,7 @@ export function ControlPanel() {
         role="tablist"
         aria-label="Control panel tabs"
       >
-        {(["layout", "background", "media"] as const).map((tab) => (
+        {(["scripture", "layout", "background", "media"] as const).map((tab) => (
           <button
             key={tab}
             role="tab"
@@ -64,6 +65,16 @@ export function ControlPanel() {
 
       {/* Tab panels */}
       <div className="flex-1 overflow-y-auto p-3">
+        {activeTab === "scripture" && (
+          <div
+            id="tabpanel-scripture"
+            role="tabpanel"
+            aria-labelledby="tab-scripture"
+          >
+            <ScripturePanel />
+          </div>
+        )}
+
         {activeTab === "layout" && (
           <div
             id="tabpanel-layout"
