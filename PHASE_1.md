@@ -1,6 +1,6 @@
 # Veyrin — Phase 1: Operator Workstation
 
-> **Status:** Active
+> **Status:** Completed
 > **Phase:** 1
 > **Phase Name:** Operator Workstation
 > **Prerequisite:** Phase 0 — Foundation complete

@@ -88,33 +88,33 @@ Do not commit with messages like "update stuff" or "fix bug".
 
 ---
 
-## What Is Currently Implemented (Phase 0)
+## What Is Currently Implemented (Phase 0 & Phase 1)
 
-- Project scaffold (Next.js 15, TypeScript, Tailwind)
+- Project scaffold (Next.js, TypeScript, Tailwind)
 - Design token system (`src/styles/tokens.css`)
-- Zustand stores (ui, service, presentation, keyboard)
+- Zustand stores (ui, service, presentation, keyboard, auth, song)
 - Centralized presentation action system
 - Keyboard hook and shortcut configuration
-- BibleProvider interface + WEB stub implementation
-- DisplayAdapter + MediaAdapter interfaces
+- BibleProvider interface + multi-version implementation (WEB, KJV, ASV, BBE)
+- DisplayAdapter + MediaAdapter interfaces & web implementations
 - Operator workstation shell (TopBar, ServicePanel, PreviewPanel, ControlPanel, OutputMonitor)
-- PresentationCanvas (output window)
-- Supabase browser and server clients
-- Vitest test suite (presentation actions, shortcuts)
+- PresentationCanvas & multi-window output (`/presentation`) via BroadcastChannel
+- Scripture search, reference parsing, and 1-verse-per-slide pagination
+- Song & lyric engine with section jump matrix and editor modal
+- Service persistence with Supabase schema & offline-first local repository
+- Authentication, organization tenant boundaries, and protected routes
+- Text, image, and video content/background support
+- Vitest test suite (90 unit and integration tests)
 - Vercel deployment configuration
-- Documentation (README, ARCHITECTURE, MASTER_BUILD, AGENTS)
+- Documentation (README, ARCHITECTURE, MASTER_BUILD, AGENTS, PHASE_1)
 
 ## What Is NOT Yet Implemented
 
-- Real service data (no Supabase tables yet)
-- Real Bible data (WEB JSON files not yet loaded)
-- Song/lyric editor
-- Scripture search UI
-- Media library
-- Service persistence
-- Authentication
-- Real presentation output (no second window management yet)
-- All Phase 1+ features (see MASTER_BUILD.md §46)
+- Multi-output engine (Stage / Confidence display, Livestream lower-third target)
+- Presentation rendering pipeline layers & visual transitions (Cut, Dissolve, Slide)
+- Advanced layout template system
+- Cloud media storage buckets & desktop filesystem adapters
+- All Phase 2+ features (see MASTER_BUILD.md §46)
 
 <!-- BEGIN:nextjs-agent-rules -->
 
