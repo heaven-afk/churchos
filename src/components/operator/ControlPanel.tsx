@@ -7,11 +7,13 @@ import type { LayoutId } from "@/types/presentation.types";
 
 import { ScripturePanel } from "./ScripturePanel";
 import { SongLibraryPanel } from "./SongLibraryPanel";
+import { TextPanel } from "./TextPanel";
+import { MediaPanel } from "./MediaPanel";
 
 /**
- * ControlPanel — right panel for Songs, Scripture, layout, background, and media controls.
+ * ControlPanel — right panel for Songs, Scripture, Text, Media, layout, and background.
  *
- * Implements Phase 1 §5.3 Scripture Search and §6.2 Song Library.
+ * Implements Phase 1 §5 (Scripture), §6 (Songs), and §9 (Text, Image & Video Media).
  */
 export function ControlPanel() {
   const isOpen = useUIStore((s) => s.isControlPanelOpen);
@@ -34,12 +36,12 @@ export function ControlPanel() {
     >
       {/* Tab bar */}
       <div
-        className="flex border-b shrink-0"
+        className="flex border-b shrink-0 overflow-x-auto"
         style={{ borderColor: "var(--color-border)" }}
         role="tablist"
         aria-label="Control panel tabs"
       >
-        {(["songs", "scripture", "layout", "background", "media"] as const).map((tab) => (
+        {(["songs", "scripture", "text", "media", "layout", "background"] as const).map((tab) => (
           <button
             key={tab}
             role="tab"
@@ -47,7 +49,7 @@ export function ControlPanel() {
             aria-selected={activeTab === tab}
             aria-controls={`tabpanel-${tab}`}
             onClick={() => setTab(tab)}
-            className="flex-1 py-3 text-xs font-semibold uppercase tracking-wide capitalize transition-colors"
+            className="flex-1 py-3 px-2 text-xs font-semibold uppercase tracking-wide capitalize transition-colors whitespace-nowrap"
             style={{
               color:
                 activeTab === tab
@@ -87,6 +89,28 @@ export function ControlPanel() {
           </div>
         )}
 
+        {activeTab === "text" && (
+          <div
+            id="tabpanel-text"
+            role="tabpanel"
+            aria-labelledby="tab-text"
+            className="h-full"
+          >
+            <TextPanel />
+          </div>
+        )}
+
+        {activeTab === "media" && (
+          <div
+            id="tabpanel-media"
+            role="tabpanel"
+            aria-labelledby="tab-media"
+            className="h-full"
+          >
+            <MediaPanel />
+          </div>
+        )}
+
         {activeTab === "layout" && (
           <div
             id="tabpanel-layout"
@@ -103,17 +127,7 @@ export function ControlPanel() {
             role="tabpanel"
             aria-labelledby="tab-background"
           >
-            <ComingSoon label="Background" phase="Phase 1" />
-          </div>
-        )}
-
-        {activeTab === "media" && (
-          <div
-            id="tabpanel-media"
-            role="tabpanel"
-            aria-labelledby="tab-media"
-          >
-            <ComingSoon label="Media Library" phase="Phase 1" />
+            <MediaPanel />
           </div>
         )}
       </div>
@@ -186,18 +200,3 @@ function LayoutPicker({ currentLayout }: { currentLayout: LayoutId | null }) {
   );
 }
 
-// ─── Coming Soon placeholder ──────────────────────────────────────────────────
-
-function ComingSoon({ label, phase }: { label: string; phase: string }) {
-  return (
-    <div
-      className="flex flex-col items-center justify-center py-16 gap-2 text-center"
-      style={{ color: "var(--color-fg-subtle)" }}
-    >
-      <p className="text-sm font-medium" style={{ color: "var(--color-fg-muted)" }}>
-        {label}
-      </p>
-      <p className="text-xs">Coming in {phase}</p>
-    </div>
-  );
-}

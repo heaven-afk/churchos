@@ -6,8 +6,11 @@ import { useUIStore } from "@/store/ui.store";
 import { dispatch } from "@/actions/presentation.actions";
 import type { ServiceItem } from "@/types/service.types";
 import type { Scripture, Song } from "@/types/content.types";
+import type { MediaItem } from "@/types/media.types";
 import type { PresentationSlide } from "@/types/presentation.types";
 import { songToPresentationSlides } from "@/lib/lyrics/lyric.service";
+import { createTextPresentationSlides } from "@/lib/content/text.service";
+import { createMediaPresentationSlide } from "@/lib/content/media.service";
 import { ServiceModal } from "./ServiceModal";
 
 const ITEM_TYPE_ICONS: Record<string, string> = {
@@ -314,6 +317,43 @@ function ServiceItemRow({
       if (presentationSlides.length > 0) {
         dispatch({ type: "SET_SLIDES", slides: presentationSlides });
         dispatch({ type: "SET_PREVIEW", slide: presentationSlides[0] });
+      }
+    } else if (item.type === "text" && item.content) {
+      const textContent = item.content as {
+        slides?: PresentationSlide[];
+        body?: string;
+        title?: string;
+        subtext?: string;
+      };
+      const slides =
+        textContent.slides && textContent.slides.length > 0
+          ? textContent.slides
+          : createTextPresentationSlides({
+              title: textContent.title,
+              body: textContent.body || item.title,
+              subtext: textContent.subtext,
+            });
+      if (slides.length > 0) {
+        dispatch({ type: "SET_SLIDES", slides });
+        dispatch({ type: "SET_PREVIEW", slide: slides[0] });
+      }
+    } else if (
+      (item.type === "image" || item.type === "video") &&
+      item.content
+    ) {
+      const mediaContent = item.content as {
+        slides?: PresentationSlide[];
+        media?: MediaItem;
+      };
+      const slides =
+        mediaContent.slides && mediaContent.slides.length > 0
+          ? mediaContent.slides
+          : mediaContent.media
+          ? [createMediaPresentationSlide(mediaContent.media)]
+          : [];
+      if (slides.length > 0) {
+        dispatch({ type: "SET_SLIDES", slides });
+        dispatch({ type: "SET_PREVIEW", slide: slides[0] });
       }
     }
   };

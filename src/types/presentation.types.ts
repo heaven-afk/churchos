@@ -42,12 +42,20 @@ export interface Background {
 
 export interface PresentationSlide {
   id: string;
+  /** Primary title (for announcements, sermon points, etc.) */
+  title?: string;
   /** Plain text content for the slide */
   text: string;
-  /** Secondary text, e.g. scripture reference below the verse */
+  /** Secondary text, e.g. scripture reference or speaker title */
   subtext?: string;
   layout: LayoutId | string;
   background: Background;
+  /** Optional media asset URL for image/video slides */
+  mediaUrl?: string;
+  /** Media type for dedicated media slides */
+  mediaType?: "image" | "video";
+  /** Text alignment */
+  textAlign?: "left" | "center" | "right";
 }
 
 // ─── Output State ────────────────────────────────────────────────────────────

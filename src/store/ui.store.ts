@@ -25,7 +25,7 @@ interface UIState {
   /** Which modal (if any) is currently open */
   activeModal: ActiveModal;
   /** Currently active tab within the control panel */
-  controlPanelTab: "songs" | "scripture" | "layout" | "background" | "media";
+  controlPanelTab: "songs" | "scripture" | "text" | "media" | "layout" | "background";
 
   // Actions
   toggleServicePanel: () => void;
